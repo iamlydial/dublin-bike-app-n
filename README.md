@@ -22,7 +22,7 @@ Ensure that you have the following installed:
 1. Clone this repository to your local machine.
 
     ```bash
-    git clone https://github.com/yourusername/dublin-bike-app-n.git
+    git clone https://github.com/iamlydial/dublin-bike-app-n/
     cd dublin-bike-app-n
     ```
 
