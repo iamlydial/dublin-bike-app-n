@@ -6,7 +6,7 @@ async function fetchData() {
         const response = await axios.get(url);
         const data = response.data;
         console.log('Fetched dataset:', data);
-        
+        return data; 
     } catch (error) {
         console.error('Error fetching dataset:', error);
         throw error;
