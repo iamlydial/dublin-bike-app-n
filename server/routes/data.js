@@ -6,8 +6,8 @@ router.post('/', async (req, res) => {
     try {
         const filters = req.body.filters || {};
         const data = await fetchData();
-
-        // Apply filters if needed
+        console.log('Fetched data:', data);
+        
         let filteredData = data;
         for (const key in filters) {
             filteredData = filteredData.filter((item) => item[key] === filters[key]);

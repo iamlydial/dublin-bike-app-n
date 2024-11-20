@@ -4,7 +4,7 @@ const _ = require("lodash");
 const fetchData = require("../utils/fetchData");
 const dayjs = require("dayjs");
 
-function defineType(values) {
+function defineType(values, key) {
   const uniqueValues = [...new Set(values)];
 
   if (
@@ -15,8 +15,18 @@ function defineType(values) {
         v === false ||
         v === "true" ||
         v === "false" ||
-        v === "banking" ||
-        v === "bonus"
+        v === "TRUE" ||
+        v === "FALSE"
+    )
+  ) {
+    return "BOOLEAN";
+  }
+
+  if (
+    uniqueValues.every(
+      (key,v) =>
+        ((key === "banking" || key === "bonus") &&
+          (v === "FALSE" || v === "TRUE"))
     )
   ) {
     return "BOOLEAN";
@@ -54,16 +64,19 @@ function defineType(values) {
   if (
     uniqueValues.every(
       (v) =>
-        (v === null) ||
-        /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{3})?$/.test(v) || // ISO 8601 format with optional milliseconds
-        /^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{3})?$/.test(v) || // YYYY-MM-DD HH:mm:ss with optional milliseconds
+        v === null ||
+        /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{3})?$/.test(
+          v
+        ) || // ISO 8601 format with optional milliseconds
+        /^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{3})?$/.test(
+          v
+        ) || // YYYY-MM-DD HH:mm:ss with optional milliseconds
         dayjs(v, "YYYY-MM-DD").isValid() ||
         dayjs(v, "YYYY-MM-DD HH:mm:ss").isValid()
     )
   ) {
     return "DATETIME";
   }
-  
 
   return "STRING";
 }
