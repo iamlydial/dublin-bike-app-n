@@ -6,7 +6,7 @@ This is the backend server for the Dublin Bike App, built using Node.js, Express
 
 - **Data Filtering**: Allows filtering data using different operators (`eq`, `lt`, `gt`).
 - **Dynamic Schema Generation**: The server dynamically generates a schema based on fetched data.
-- **ID-based Data Retrieval**: You can retrieve data for a specific ID by providing it in the request.
+
 
 ## Installation
 
