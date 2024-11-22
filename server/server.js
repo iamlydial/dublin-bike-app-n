@@ -14,6 +14,7 @@ app.use('/schema', schemaRoutes);
 app.use('/data', dataRoutes);
 console.log(schemaRoutes);
 console.log(dataRoutes);
+app.use('/data/:id', dataRoutes);
 
 
 // Start server
