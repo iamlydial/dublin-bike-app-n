@@ -20,7 +20,10 @@ function applyFilter(item, field, operator, value) {
 
 router.post("/", async (req, res) => {
   try {
-    const { where, orderBy } = req.body;
+    const { where, orderBy, page, pageSize } = req.body;
+
+    const validPage = isNaN(page) || page < 1 ? 1 : page;
+    const validPageSize = isNaN(pageSize) || pageSize < 1 ? 10 : pageSize;
 
     const data = await fetchData();
     console.log("Fetched data:", data);
@@ -50,7 +53,7 @@ router.post("/", async (req, res) => {
       });
     }
 
-    // add order by 
+    // add order by
     if (orderBy && orderBy.field && orderBy.direction) {
       const sortField = fieldMapping[orderBy.field] || orderBy.field;
 
@@ -60,11 +63,35 @@ router.post("/", async (req, res) => {
         } else if (orderBy.direction === "desc") {
           return a[sortField] < b[sortField] ? 1 : -1;
         }
-        return 0; 
+        return 0;
       });
     }
 
-    res.json(filteredData);
+    // manage pagination
+    const totalItems = filteredData.length;
+    const totalPages = Math.ceil(totalItems / validPageSize);
+
+    const startIndex = (validPage - 1) * validPageSize;
+    const endIndex = startIndex + validPageSize;
+    const paginatedData = filteredData.slice(startIndex, endIndex);
+
+    if (validPage > totalPages) {
+      return res.json({
+        data: [],
+        page: validPage,
+        pageSize: validPageSize,
+        totalItems,
+        totalPages,
+      });
+    }
+
+    res.json({
+      data: paginatedData,
+      page: validPage,
+      pageSize: validPageSize,
+      totalItems,
+      totalPages,
+    });
   } catch (error) {
     console.error("Error fetching data:", error);
     res.status(500).json({ error: "Failed to fetch data" });
