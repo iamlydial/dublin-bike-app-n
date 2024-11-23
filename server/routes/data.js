@@ -20,7 +20,7 @@ function applyFilter(item, field, operator, value) {
 
 router.post("/", async (req, res) => {
   try {
-    const { where } = req.body;
+    const { where, orderBy } = req.body;
 
     const data = await fetchData();
     console.log("Fetched data:", data);
@@ -47,6 +47,20 @@ router.post("/", async (req, res) => {
 
       filteredData = filteredData.filter((item) => {
         return applyFilter(item, dataFieldName, operator, value);
+      });
+    }
+
+    // add order by 
+    if (orderBy && orderBy.field && orderBy.direction) {
+      const sortField = fieldMapping[orderBy.field] || orderBy.field;
+
+      filteredData.sort((a, b) => {
+        if (orderBy.direction === "asc") {
+          return a[sortField] > b[sortField] ? 1 : -1;
+        } else if (orderBy.direction === "desc") {
+          return a[sortField] < b[sortField] ? 1 : -1;
+        }
+        return 0; 
       });
     }
 
