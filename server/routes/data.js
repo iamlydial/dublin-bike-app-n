@@ -138,4 +138,43 @@ router.post("/:id", async (req, res) => {
   }
 });
 
+async function deleteBikeStationById(id, schema) {
+  const bikeStations = await fetchData();
+  const fieldMapping = schema.reduce((map, field) => {
+    map[field.name] = field.display;
+    return map;
+  }, {});
+
+  const idField = fieldMapping["id"] || "id";
+
+  const index = bikeStations.findIndex(station => station[idField] == id);
+
+  if (index !== -1) {
+    bikeStations.splice(index, 1);
+    return true;
+  }
+
+  return false;
+}
+
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const schema = await generateSchema();
+    console.log("Generated Schema:", schema);
+
+    const result = await deleteBikeStationById(id, schema);
+
+    if (result) {
+      res.status(200).json({ message: `Station ${id} deleted successfully.` });
+    } else {
+      res.status(404).json({ error: `Station with id ${id} not found.` });
+    }
+  } catch (error) {
+    console.error("Error deleting station:", error);
+    res.status(500).json({ error: "Failed to delete station." });
+  }
+});
+
 module.exports = router;
