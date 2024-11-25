@@ -1,7 +1,42 @@
 const express = require("express");
 const fetchData = require("../utils/fetchData");
-const generateSchema = require("./schema.js");
-const router = express.Router();
+const { router, generateSchema } = require("./schema");
+const _ = require("lodash");
+
+router.get("/get-data", async (req, res) => {
+  try {
+    // Fetch the actual data
+    const data = await fetchData();
+
+    // Generate the schema
+    const schema = await generateSchema();
+    console.log("Generated Schema:", schema);
+
+    const fieldMapping = schema.reduce((map, field) => {
+      map[field.display] = field.name; 
+      return map;
+    }, {});
+
+    const transformedData = data.map(item => {
+      const transformedItem = {};
+
+      for (const field in item) {
+        if (fieldMapping[field]) {
+          transformedItem[fieldMapping[field]] = item[field];
+        } else {
+          transformedItem[field] = item[field];
+        }
+      }
+      return transformedItem;
+    });
+
+    res.json(transformedData);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).json({ error: "Failed to fetch data" });
+  }
+});
+
 
 function applyFilter(item, field, operator, value) {
   switch (operator) {
@@ -178,7 +213,7 @@ router.delete("/:id", async (req, res) => {
 });
 
 async function updateBikeStationById(id, updatedData, schema) {
-  const bikeStations = await fetchData(); 
+  const bikeStations = await fetchData();
 
   const fieldMapping = schema.reduce((map, field) => {
     map[field.name] = field.display;
@@ -202,19 +237,21 @@ async function updateBikeStationById(id, updatedData, schema) {
     }
   }
 
-  console.log('Updated bikeStations:', bikeStations);
+  console.log("Updated bikeStations:", bikeStations);
 
-  return { message: `Station ${id} updated successfully.`, updatedData: bikeStation };
+  return {
+    message: `Station ${id} updated successfully.`,
+    updatedData: bikeStation,
+  };
 }
-
 
 router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const updatedData = req.body;
 
-    const schema = await generateSchema(); 
-    console.log("Schema generated:", schema);  
+    const schema = await generateSchema();
+    console.log("Schema generated:", schema);
     if (!schema || !Array.isArray(schema)) {
       throw new Error("Schema is invalid or not an array");
     }

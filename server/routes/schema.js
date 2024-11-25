@@ -24,9 +24,9 @@ function defineType(values, key) {
 
   if (
     uniqueValues.every(
-      (key,v) =>
-        ((key === "banking" || key === "bonus") &&
-          (v === "FALSE" || v === "TRUE"))
+      (key, v) =>
+        (key === "banking" || key === "bonus") &&
+        (v === "FALSE" || v === "TRUE")
     )
   ) {
     return "BOOLEAN";
@@ -83,6 +83,7 @@ function defineType(values, key) {
 
 async function generateSchema() {
   try {
+    console.log("Fetching data...");
     const data = await fetchData();
     console.log("Fetched data:", data);
 
@@ -103,6 +104,7 @@ async function generateSchema() {
       };
     });
 
+    console.log("Schema generated:", schema);
     return schema;
   } catch (error) {
     console.error("Error generating schema:", error);
@@ -110,7 +112,8 @@ async function generateSchema() {
   }
 }
 
-router.get("/", async (req, res) => {
+router.get("/schema", async (req, res) => {
+  console.log("Schema route hit");
   try {
     const schema = await generateSchema();
     res.json(schema);
@@ -119,4 +122,4 @@ router.get("/", async (req, res) => {
   }
 });
 
-module.exports = generateSchema;
+module.exports = { router, generateSchema };
