@@ -1,7 +1,6 @@
 const express = require("express");
 const fetchData = require("../utils/fetchData");
 const { router, generateSchema } = require("./schema");
-const _ = require("lodash");
 
 router.get("/get-data", async (req, res) => {
   try {
@@ -13,11 +12,11 @@ router.get("/get-data", async (req, res) => {
     console.log("Generated Schema:", schema);
 
     const fieldMapping = schema.reduce((map, field) => {
-      map[field.display] = field.name; 
+      map[field.display] = field.name;
       return map;
     }, {});
 
-    const transformedData = data.map(item => {
+    const transformedData = data.map((item) => {
       const transformedItem = {};
 
       for (const field in item) {
@@ -36,7 +35,6 @@ router.get("/get-data", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch data" });
   }
 });
-
 
 function applyFilter(item, field, operator, value) {
   switch (operator) {
@@ -73,16 +71,30 @@ router.post("/", async (req, res) => {
     console.log("Generated Schema:", schema);
 
     const fieldMapping = schema.reduce((map, field) => {
-      map[field.name] = field.display;
+      map[field.display] = field.name;
       return map;
     }, {});
+
+    filteredData = data.map((item) => {
+      const transformedItem = {};
+
+      for (const field in item) {
+        if (fieldMapping[field]) {
+          transformedItem[fieldMapping[field]] = item[field];
+        } else {
+          transformedItem[field] = item[field];
+        }
+      }
+      return transformedItem;
+    });
+
+    console.log(fieldMapping, "fieldMapping from post / ");
 
     for (const field in where) {
       const condition = where[field];
       const [operator, value] = Object.entries(condition)[0];
 
       const dataFieldName = fieldMapping[field] || field;
-
       filteredData = filteredData.filter((item) => {
         return applyFilter(item, dataFieldName, operator, value);
       });
@@ -135,8 +147,8 @@ router.post("/", async (req, res) => {
 
 router.post("/:id", async (req, res) => {
   try {
-    const { where } = req.body;
     const { id } = req.params;
+    const { where } = req.body;
 
     const data = await fetchData();
     console.log("Fetched data:", data);
@@ -147,7 +159,7 @@ router.post("/:id", async (req, res) => {
     console.log("Generated Schema:", schema);
 
     const fieldMapping = schema.reduce((map, field) => {
-      map[field.name] = field.display;
+      map[field.display] = field.name;
       return map;
     }, {});
 
