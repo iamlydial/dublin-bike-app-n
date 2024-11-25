@@ -147,7 +147,7 @@ async function deleteBikeStationById(id, schema) {
 
   const idField = fieldMapping["id"] || "id";
 
-  const index = bikeStations.findIndex(station => station[idField] == id);
+  const index = bikeStations.findIndex((station) => station[idField] == id);
 
   if (index !== -1) {
     bikeStations.splice(index, 1);
@@ -174,6 +174,61 @@ router.delete("/:id", async (req, res) => {
   } catch (error) {
     console.error("Error deleting station:", error);
     res.status(500).json({ error: "Failed to delete station." });
+  }
+});
+
+async function updateBikeStationById(id, updatedData, schema) {
+  const bikeStations = await fetchData(); 
+
+  const fieldMapping = schema.reduce((map, field) => {
+    map[field.name] = field.display;
+    return map;
+  }, {});
+
+  const idField = fieldMapping["id"] || "id";
+
+  const index = bikeStations.findIndex((station) => station[idField] == id);
+
+  if (index === -1) {
+    return { error: `Station with id ${id} not found.` };
+  }
+
+  const bikeStation = bikeStations[index];
+
+  for (let key in updatedData) {
+    const fieldName = fieldMapping[key] || key;
+    if (bikeStation[fieldName] !== undefined) {
+      bikeStation[fieldName] = updatedData[key];
+    }
+  }
+
+  console.log('Updated bikeStations:', bikeStations);
+
+  return { message: `Station ${id} updated successfully.`, updatedData: bikeStation };
+}
+
+
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedData = req.body;
+
+    const schema = await generateSchema(); 
+    console.log("Schema generated:", schema);  
+    if (!schema || !Array.isArray(schema)) {
+      throw new Error("Schema is invalid or not an array");
+    }
+
+    const result = await updateBikeStationById(id, updatedData, schema);
+
+    if (result.error) {
+      return res.status(404).json({ error: result.error });
+    }
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error updating station:", error);
+    res.status(500).json({ error: "Failed to update station." });
   }
 });
 
