@@ -177,6 +177,19 @@ router.post("/:id", async (req, res) => {
         );
       }
     }
+    
+    filteredData = data.map((item) => {
+      const transformedItem = {};
+
+      for (const field in item) {
+        if (fieldMapping[field]) {
+          transformedItem[fieldMapping[field]] = item[field];
+        } else {
+          transformedItem[field] = item[field];
+        }
+      }
+      return transformedItem;
+    });
 
     res.json(filteredData);
   } catch (error) {
